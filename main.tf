@@ -35,7 +35,7 @@ resource "aws_s3_bucket_website_configuration" "website_bucket" {
   bucket = aws_s3_bucket.website_bucket.id
 
   index_document {
-    suffix = "index.html"
+    suffix = "sakarltech.html"
   }
 
   error_document {
@@ -52,9 +52,10 @@ resource "aws_s3_bucket_website_configuration" "website_bucket" {
   }
 }
 
-# Create a bucket policy
+# Create and attach bucket policy
 resource "aws_s3_bucket_policy" "allow_access_from_another_account" {
   bucket = aws_s3_bucket.website_bucket.id
+  depends_on = [ aws_s3_bucket.website_bucket ]
   policy = data.aws_iam_policy_document.allow_access_from_another_account.json
 }
 
@@ -76,4 +77,16 @@ data "aws_iam_policy_document" "allow_access_from_another_account" {
       "${aws_s3_bucket.website_bucket.arn}/*",
     ]
   }
+}
+
+# Upload website files
+resource "aws_s3_object" "website_bucket" {
+  bucket = "sakarltechwebbucket"
+  key    = "sakarltech.html"
+  source = "/Users/aideyancarlton/Downloads/sakarltech.html"
+
+  # The filemd5() function is available in Terraform 0.11.12 and later
+  # For Terraform 0.11.11 and earlier, use the md5() function and the file() function:
+  # etag = "${md5(file("path/to/file"))}"
+  etag = filemd5("/Users/aideyancarlton/Downloads/sakarltech.html")
 }
